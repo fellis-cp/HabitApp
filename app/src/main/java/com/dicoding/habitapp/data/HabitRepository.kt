@@ -48,8 +48,6 @@ class HabitRepository(private val habitDao: HabitDao, private val executor: Exec
     //TODO 5 : Complete other function inside repository
     fun getHabitById(habitId: Int): LiveData<Habit> = habitDao.getHabitById(habitId)
 
-
-
     fun insertHabit(newHabit: Habit) {
         executor.execute {
             habitDao.insertHabit(newHabit)
