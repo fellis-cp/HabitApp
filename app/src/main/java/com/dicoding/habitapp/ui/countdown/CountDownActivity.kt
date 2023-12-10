@@ -25,6 +25,10 @@ class CountDownActivity : AppCompatActivity() {
             val viewModel = ViewModelProvider(this).get(CountDownViewModel::class.java)
 
             //TODO 10 : Set initial time and observe current time. Update button state when countdown is finished
+            viewModel.setInitialTime(habit.minutesFocus)
+            viewModel.currentTimeString.observe(this) {
+                findViewById<TextView>(R.id.tv_count_down).text = it
+            }
 
             //TODO 13 : Start and cancel One Time Request WorkManager to notify when time is up.
 
