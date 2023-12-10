@@ -47,7 +47,7 @@ class RandomHabitAdapter(
             private val  tvStartTime = itemView.findViewById<TextView>(R.id.pager_tv_start_time)
             private val  ivPriority = itemView.findViewById<ImageView>(R.id.item_priority_level)
             private val  tvMinutes = itemView.findViewById<TextView>(R.id.pager_tv_minutes)
-            private val  btnStartCountDown = itemView.findViewById<Button>(R.id.btn_open_count_down)
+            private val  btnStartCountDown = itemView.findViewById<Button>(R.id.btnCountDown)
         fun bind(pageType: PageType, pageData: Habit) {
 
             val color = when(pageType) {
