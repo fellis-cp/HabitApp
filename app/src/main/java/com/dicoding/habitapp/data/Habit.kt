@@ -8,7 +8,6 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "habits")
 @Parcelize
 data class Habit(
-
     val id: Int = 0,
     val title: String,
     val minutesFocus: Long,
