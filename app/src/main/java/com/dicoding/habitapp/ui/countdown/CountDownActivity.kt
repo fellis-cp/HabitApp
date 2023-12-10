@@ -6,12 +6,22 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat.getParcelableExtra
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.dicoding.habitapp.R
 import com.dicoding.habitapp.data.Habit
+import com.dicoding.habitapp.notification.NotificationWorker
 import com.dicoding.habitapp.utils.HABIT
+import com.dicoding.habitapp.utils.HABIT_ID
+import com.dicoding.habitapp.utils.HABIT_TITLE
+import com.dicoding.habitapp.utils.NOTIFICATION_CHANNEL_ID
+import com.dicoding.habitapp.utils.NOTIF_UNIQUE_WORK
 
 class CountDownActivity : AppCompatActivity() {
 
+    private lateinit var oneTimeWorkRequest: OneTimeWorkRequest
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_count_down)
@@ -22,7 +32,7 @@ class CountDownActivity : AppCompatActivity() {
         if (habit != null){
             findViewById<TextView>(R.id.tv_count_down_title).text = habit.title
 
-            val viewModel = ViewModelProvider(this).get(CountDownViewModel::class.java)
+            val viewModel = ViewModelProvider(this)[CountDownViewModel::class.java]
 
             //TODO 10 : Set initial time and observe current time. Update button state when countdown is finished
             viewModel.setInitialTime(habit.minutesFocus)
@@ -31,18 +41,47 @@ class CountDownActivity : AppCompatActivity() {
             }
 
             //TODO 13 : Start and cancel One Time Request WorkManager to notify when time is up.
+            val workManager = WorkManager.getInstance(this)
+            val channel = getString(R.string.notify_channel_name)
+
+            val dataNotification = Data.Builder()
+                .putInt(HABIT_ID , habit.id)
+                .putString(HABIT_TITLE , habit.title)
+                .putString(NOTIFICATION_CHANNEL_ID , channel)
+                .build()
+
+            oneTimeWorkRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
+                .setInputData(dataNotification)
+                .addTag(NOTIF_UNIQUE_WORK)
+                .build()
+
+            viewModel.eventCountDownFinish.observe(this){ countDownFinished ->
+                if (countDownFinished) {
+                    workManager.enqueueUniqueWork(
+                        NOTIF_UNIQUE_WORK ,
+                        ExistingWorkPolicy.REPLACE,
+                        oneTimeWorkRequest
+                    )
+
+                    updateButtonState(false)
+                }
+            }
 
             findViewById<Button>(R.id.btn_start).setOnClickListener {
+                updateButtonState(true)
+                viewModel.startTimer()
 
             }
 
             findViewById<Button>(R.id.btn_stop).setOnClickListener {
+                viewModel.resetTimer()
+                workManager.cancelUniqueWork(NOTIF_UNIQUE_WORK)
+                updateButtonState(false)
 
             }
         }
 
     }
-
     private fun updateButtonState(isRunning: Boolean) {
         findViewById<Button>(R.id.btn_start).isEnabled = !isRunning
         findViewById<Button>(R.id.btn_stop).isEnabled = isRunning
