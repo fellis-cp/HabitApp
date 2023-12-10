@@ -2,13 +2,17 @@ package com.dicoding.habitapp.data
 
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
+import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 
-//TODO 2 : Define data access object (DAO)
+//TODO 2 : Define data access object
+
+@Dao
 interface HabitDao {
 
     @RawQuery(observedEntities = [Habit::class])
@@ -23,6 +27,7 @@ interface HabitDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg habits: Habit)
 
+    @Delete
     fun deleteHabit(habits: Habit)
     @Query("SELECT * FROM habits WHERE priorityLevel = :level ORDER BY RANDOM()")
     fun getRandomHabitByPriorityLevel(level: String): LiveData<Habit>
